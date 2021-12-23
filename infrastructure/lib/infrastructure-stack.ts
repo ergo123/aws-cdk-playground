@@ -1,16 +1,20 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import {RemovalPolicy, Stack, StackProps} from 'aws-cdk-lib';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as s3Deployment from 'aws-cdk-lib/aws-s3-deployment';
+import {Construct} from 'constructs';
 
 export class InfrastructureStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    const spaBucket = new s3.Bucket(this, 'SPABucket', {
+      removalPolicy: RemovalPolicy.DESTROY,
+      bucketName: 'spa-bucket'
+    });
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'InfrastructureQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    new s3Deployment.BucketDeployment(this, 'DeploySPA', {
+      sources: [s3Deployment.Source.asset('../app/out')],
+      destinationBucket: spaBucket
+    })
   }
 }
